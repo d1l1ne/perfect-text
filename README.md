@@ -1,0 +1,2 @@
+An application with GUI which helps user fixing spaces issues in some text/article/document etc. 
+Download as installer: https://drive.google.com/drive/folders/1rxlP_r7VqY3scYGzdJpk3QADHxkLkpg7?usp=sharing
