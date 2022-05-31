@@ -6,7 +6,7 @@ An application with GUI which helps user fixing spaces issues in some text/artic
 
 ## Version 1.0:
 
-This app can help you correcting simple mistakes like unnecessary spaces around pucntuation marks etc.
+This app can help you correcting simple mistakes like unnecessary spaces around pucntuation marks.
 
 
 *Using "Fix sentence separation" if you have web-adresses or emails in your text may cause appearance of unnecessary spaces like "google. com" (this issue will be fixed in version 1.1)*
