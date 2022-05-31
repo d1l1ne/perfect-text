@@ -3,19 +3,25 @@ import func_module
 import tkinter as tk
 from tkinter import ttk
 import pyperclip
+import requests
+from bs4 import BeautifulSoup
+import webbrowser
+from tkinter import messagebox as mb
 
 root = tk.Tk()
 
+
 #adapting window size to user's configuration
-screen_width = int(root.winfo_screenwidth()*0.66)
-screen_height = int(root.winfo_screenheight()*0.66)
-
-
+if int(root.winfo_screenheight())<720 or int(root.winfo_screenwidth())<1280:
+    screen_width = int(root.winfo_screenwidth()*0.66)
+    screen_height = int(root.winfo_screenheight()*0.66)
+else:
+    screen_width = 1267
+    screen_height = 713
 root.geometry(f'{screen_width}x{screen_height}')
 root.title('PerfectText')
-root.iconbitmap('logo.ico')
+root.iconbitmap('perfecttext.ico')
 root.resizable(False, False)
-
 
 
 w = ttk.Frame(root, padding='10 10 10 10')
@@ -49,7 +55,7 @@ fix_dash = ttk.Checkbutton(w, text='Fix dashes', variable=fd, state='DISABLED')
 select_all = ttk.Button(w, text='SELECT ALL')
 console_label = ttk.Label(w, text='Console:', font=('arial', 10, 'bold'))
 console_field = tk.Listbox(w, width=25)
-version_label = ttk.Label(w, text='Beta 1')
+version_button = ttk.Button(w, text='Version 1.0')
 
 input_label.grid(column=1, row=0, padx=(0, 90))
 input_field.grid(column=0, row=1, columnspan=3, rowspan=3)
@@ -67,7 +73,7 @@ fix_dash.grid(column=1, row=5, sticky='w')
 select_all.grid(column=0, row=6, sticky='nw')
 console_label.grid(column=4, row=5, sticky='w')
 console_field.grid(column=4, row=6, columnspan=2, rowspan=2, sticky='w')
-version_label.place(relx=0.95, rely=0.97)
+version_button.place(relx=0.94, rely=0.97)
 
 def process():
     output_field.delete(1.0, 'end')
@@ -133,7 +139,25 @@ def copying():
 def pasting():
     input_field.delete(1.0, 'end')
     input_field.insert(1.0, pyperclip.paste())
-
+    
+def check_version():
+    try:
+        requests.head("http://www.google.com/", timeout=1)
+        connection = True
+    except requests.ConnectionError:
+        mb.showerror(title='Unable to check version', message='Unable to check version\nNo internet connection')
+        connection = False
+    if connection:
+        response = requests.get('https://drive.google.com/drive/folders/1rxlP_r7VqY3scYGzdJpk3QADHxkLkpg7')
+        soup = BeautifulSoup(response.text, 'html.parser')
+        w=str(soup.find('title'))
+        ok = w[7:21]
+        if ok!='PerfectText1.0':
+            answer = mb.askyesno(title='Version 1.0', message='New version is available. Do you want to download it?')
+            if answer:
+                webbrowser.open('https://drive.google.com/drive/folders/1rxlP_r7VqY3scYGzdJpk3QADHxkLkpg7', new=2)
+        elif ok=='PerfectText1.0':
+            mb.showinfo(title='Version 1.0', message='You\'re using the latest version!')
 
 start_button['command']=process 
 clear_input['command']=delete_input
@@ -141,6 +165,7 @@ clear_output['command']=delete_output
 select_all['command']=sel_all
 copy_button['command']=copying
 paste_button['command']=pasting
+version_button['command']=check_version
      
 root.columnconfigure(0, weight=1)
 root.rowconfigure(0, weight=1)
