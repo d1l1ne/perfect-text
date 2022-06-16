@@ -7,6 +7,9 @@ import requests
 from bs4 import BeautifulSoup
 import webbrowser
 from tkinter import messagebox as mb
+from tkinter import filedialog as fid
+from tkinter.filedialog import asksaveasfilename
+
 
 root = tk.Tk()
 
@@ -38,6 +41,7 @@ sa = tk.IntVar()
 sa.set(0)
 output_text=''
 input_text=''
+radio_var=tk.IntVar()
 
 input_label = ttk.Label(w, text='Your text:', font=('arial', 20, 'bold'))
 input_field = tk.Text(w, font='arial')
@@ -55,7 +59,10 @@ fix_dash = ttk.Checkbutton(w, text='Fix dashes', variable=fd, state='DISABLED')
 select_all = ttk.Button(w, text='SELECT ALL')
 console_label = ttk.Label(w, text='Console:', font=('arial', 10, 'bold'))
 console_field = tk.Listbox(w, width=25)
-version_button = ttk.Button(w, text='Version 1.0')
+version_button = ttk.Button(w, text='Version 1.1')
+domains_check_true = ttk.Radiobutton(w, text='My text contains web-addresses or emails', variable=radio_var, value=1)
+domains_check_false = ttk.Radiobutton(w, text="My text doesn't contain web-addresses or emails", variable=radio_var, value=0)
+save_as=ttk.Button(w, text="Save as TXT")
 
 input_label.grid(column=1, row=0, padx=(0, 90))
 input_field.grid(column=0, row=1, columnspan=3, rowspan=3)
@@ -74,11 +81,14 @@ select_all.grid(column=0, row=6, sticky='nw')
 console_label.grid(column=4, row=5, sticky='w')
 console_field.grid(column=4, row=6, columnspan=2, rowspan=2, sticky='w')
 version_button.place(relx=0.94, rely=0.97)
+domains_check_true.place(relx=0.001, rely=0.8)
+domains_check_false.place(relx=0.001, rely=0.83)
+save_as.place(relx=0.94, rely=0.7)
 
 def process():
     output_field.delete(1.0, 'end')
     console_field.delete(0, 'end')
-    input_text = input_field.get("1.0",'end-1c')
+    input_text = input_field.get("1.0",'end-1c') + ' '
     if input_text!='':
         start_button['state']='disabled'
         start_time = perf_counter()
@@ -99,11 +109,18 @@ def process():
             result = str("%.4f" % result) + 's'
             console_field.insert('end', f'Fixing brackets: {result}')
         if fs.get()==1:
-            start_time = perf_counter()
-            input_text = func_module.fix_separation_of_sentences(input_text)
-            result = perf_counter()-start_time
-            result = str("%.4f" % result) + 's'
-            console_field.insert('end', f'Fixing separation: {result}')
+            if radio_var.get()==0:
+                start_time = perf_counter()
+                input_text = func_module.fix_separation_of_sentences(input_text)
+                result = perf_counter()-start_time
+                result = str("%.4f" % result) + 's'
+                console_field.insert('end', f'Fixing separation: {result}')
+            elif radio_var.get()==1:
+                start_time = perf_counter()
+                input_text = func_module.fix_separation_wsites(input_text)
+                result = perf_counter()-start_time
+                result = str("%.4f" % result) + 's'
+                console_field.insert('end', f'Fixing separation: {result}')
         if fd.get()==1:
             start_time = perf_counter()
             input_text = func_module.fix_dashes(input_text)
@@ -145,19 +162,28 @@ def check_version():
         requests.head("http://www.google.com/", timeout=1)
         connection = True
     except requests.ConnectionError:
-        mb.showerror(title='Unable to check version', message='Unable to check version\nNo internet connection')
+        showerror(title='Unable to check version', message='Unable to check version\nNo internet connection')
         connection = False
     if connection:
         response = requests.get('https://drive.google.com/drive/folders/1rxlP_r7VqY3scYGzdJpk3QADHxkLkpg7')
         soup = BeautifulSoup(response.text, 'html.parser')
         w=str(soup.find('title'))
         ok = w[7:21]
-        if ok!='PerfectText1.0':
-            answer = mb.askyesno(title='Version 1.0', message='New version is available. Do you want to download it?')
+        if ok!='PerfectText1.1':
+            answer = askyesno(title='Version 1.1', message='New version is available. Do you want to download it?')
             if answer:
                 webbrowser.open('https://drive.google.com/drive/folders/1rxlP_r7VqY3scYGzdJpk3QADHxkLkpg7', new=2)
-        elif ok=='PerfectText1.0':
-            mb.showinfo(title='Version 1.0', message='You\'re using the latest version!')
+        elif ok=='PerfectText1.1':
+            showinfo(title='Version 1.1', message='You\'re using the latest version!')
+
+def save_as_txt():
+    if output_field.get("1.0",'end-1c')=='':
+        showerror(title='Error', message='No content in output field')
+    else:
+        file = asksaveasfilename(filetypes=[("TEXT FILE", ".txt")], defaultextension=".txt")
+        saver = open(file, 'w')
+        saver.write(output_field.get("1.0",'end-1c'))
+        saver.close()
 
 start_button['command']=process 
 clear_input['command']=delete_input
@@ -166,6 +192,7 @@ select_all['command']=sel_all
 copy_button['command']=copying
 paste_button['command']=pasting
 version_button['command']=check_version
+save_as['command']=save_as_txt
      
 root.columnconfigure(0, weight=1)
 root.rowconfigure(0, weight=1)
