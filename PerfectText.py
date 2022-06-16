@@ -9,7 +9,7 @@ import webbrowser
 from tkinter import messagebox as mb
 from tkinter import filedialog as fid
 from tkinter.filedialog import asksaveasfilename
-
+#Idk why but when I make this an exe my version checker doesn't work :(
 
 root = tk.Tk()
 
